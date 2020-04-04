@@ -31,7 +31,8 @@ class CustomRequestHandler(hts.BaseHTTPRequestHandler):
         self.dispatcher = URIDispatcher()
         # Definicion de verbo + ruta + callback
         self.dispatcher.mappings = [
-            ('GET', '/example', self.hello_rest)
+            ('GET', '/example', self.hello_rest),
+            ('POST', '/example/new', self.insertar_ejemplo),
         ]
         # Directorio actual
         self.cwd = os.getcwd()
@@ -123,6 +124,22 @@ class CustomRequestHandler(hts.BaseHTTPRequestHandler):
     @json
     def hello_rest(self):
         self.stdout_write({'status': 1, 'msg': 'Hello REST!'})
+
+    @composed(recibe_json, json)
+    def insertar_ejemplo(self):
+        """ Responde a /example/new con JSON tal que {'name': 'un_nombre'}.
+
+        Se puede probar con el comando:
+        curl --header "Content-Type: application/json" --request POST --data '{"name":"nombre_de_ejemplo"}' http://localhost:8081/example/new
+        """
+        json = self.get_json()
+        if 'name' not in json:
+            self.send_response(400)
+            return
+
+        # Lo mete en la base de datos.
+        self.dao.insert('EJEMPLO', ('name',), (json['name'],))
+        self.stdout_write({'status': 1})
 
     ################################
     # FIN: Funciones de ejemplo ####
