@@ -7,6 +7,9 @@
 # Script principal de la aplicacion
 
 import sys
+import os
+
+import lib.helpers.os_utils as ou
 
 
 def is_python_3() -> bool:
@@ -22,6 +25,9 @@ def main():
     if not is_python_3():
         print('ERROR: Se requiere Python 3')
         sys.exit(-1)
+
+    if not ou.exists_dir('/opt/reparto_material'):
+        os.mkdir('/opt/reparto_material')
 
 
 if __name__ == '__main__':
